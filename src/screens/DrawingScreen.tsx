@@ -81,13 +81,21 @@ const DrawingScreen: React.FC<DrawingScreenProps> = ({ onComplete }) => {
     if (!isDrawing) return;
 
     // Add point to path
-    setCurrentPath(prev => [...prev, { x, y, timestamp: Date.now() }]);
-
-    // Check if reached end dot
-    const distance = calculateDistance({ x, y, timestamp: 0 }, endDotPosition);
-    if (distance <= 30) {
-      handleComplete();
-    }
+    const newPoint = { x, y, timestamp: Date.now() };
+    setCurrentPath(prev => {
+      const updated = [...prev, newPoint];
+      
+      // Check if reached end dot
+      const distance = calculateDistance(newPoint, endDotPosition);
+      if (distance <= 30) {
+        // Trigger completion asynchronously
+        setTimeout(() => {
+          handleComplete(updated);
+        }, 0);
+      }
+      
+      return updated;
+    });
   }, [isDrawing, endDotPosition]);
 
   const handleTouchEnd = useCallback(() => {
@@ -98,8 +106,8 @@ const DrawingScreen: React.FC<DrawingScreenProps> = ({ onComplete }) => {
     setCurrentPath([]);
   }, [isDrawing]);
 
-  const handleComplete = async () => {
-    if (currentPath.length === 0) return;
+  const handleComplete = async (pathToSave: Point[]) => {
+    if (pathToSave.length === 0) return;
 
     setIsDrawing(false);
 
@@ -108,10 +116,10 @@ const DrawingScreen: React.FC<DrawingScreenProps> = ({ onComplete }) => {
       const segment: LineSegment = {
         id: getTodayId(),
         date: new Date().toISOString(),
-        path: currentPath,
-        startPoint: currentPath[0],
-        endPoint: currentPath[currentPath.length - 1],
-        duration: (currentPath[currentPath.length - 1].timestamp - currentPath[0].timestamp) / 1000,
+        path: pathToSave,
+        startPoint: pathToSave[0],
+        endPoint: pathToSave[pathToSave.length - 1],
+        duration: (pathToSave[pathToSave.length - 1].timestamp - pathToSave[0].timestamp) / 1000,
         completed: true,
       };
 
