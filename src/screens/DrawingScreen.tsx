@@ -70,7 +70,8 @@ const DrawingScreen: React.FC<DrawingScreenProps> = ({ onComplete }) => {
 
   const handleTouchStart = useCallback((x: number, y: number) => {
     // Only start drawing if touch is near start dot
-    if (isNearStartDot(x, y)) {
+    const distance = calculateDistance({ x, y, timestamp: 0 }, startDotPosition);
+    if (distance <= 30) {
       setIsDrawing(true);
       setCurrentPath([{ x, y, timestamp: Date.now() }]);
     }
@@ -83,7 +84,8 @@ const DrawingScreen: React.FC<DrawingScreenProps> = ({ onComplete }) => {
     setCurrentPath(prev => [...prev, { x, y, timestamp: Date.now() }]);
 
     // Check if reached end dot
-    if (isNearEndDot(x, y)) {
+    const distance = calculateDistance({ x, y, timestamp: 0 }, endDotPosition);
+    if (distance <= 30) {
       handleComplete();
     }
   }, [isDrawing, endDotPosition]);

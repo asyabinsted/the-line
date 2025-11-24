@@ -73,6 +73,8 @@ const Canvas: React.FC<CanvasProps> = ({
   // Touch gesture (for drawing)
   const touchGesture = Gesture.Manual()
     .onTouchesDown((event) => {
+      // Only handle single finger touches for drawing
+      if (event.allTouches.length !== 1) return;
       if (isDrawing) return; // Already drawing
       
       const touch = event.allTouches[0];
@@ -82,6 +84,8 @@ const Canvas: React.FC<CanvasProps> = ({
       onTouchStart(x, y);
     })
     .onTouchesMove((event) => {
+      // Only continue if single finger and drawing
+      if (event.allTouches.length !== 1) return;
       if (!isDrawing) return;
       
       const touch = event.allTouches[0];
